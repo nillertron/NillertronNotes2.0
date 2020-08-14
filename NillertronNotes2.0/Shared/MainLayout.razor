@@ -1,0 +1,44 @@
+﻿@inherits LayoutComponentBase
+<div class="container-fluid" style="padding:0">
+    <div class="row" style="z-index:9999">
+        <div class="col-sm-12">
+            <div class="container-fluid" style="padding:0; height:100px; position:fixed; z-index:999">
+                <div class="top-row border" style="padding:0;position:relative; background-color:whitesmoke; color:black">
+                    <div class="col-sm-2">
+                        <img src="/topLogo.png" class="justify-content-start" style="width:62px; height:auto" />
+                    </div>
+                    <div class="col-sm-7"></div>
+                    
+                    <div class="col-lg-3">
+                       <LoginDisplay />
+                    </div>
+
+                </div>
+                <div class="row justify-content-around" style="position:relative">
+                    <div class="col-sm-12 px-0 text-center" style="background-color:#1b6ec2; z-index:99; width:100%;">
+                        <NavMenu />
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" style="padding-top:80px; z-index:1">
+        <div class="col-sm-12">
+            <div class="container" style="z-index:1">
+                <div class="row" style="z-index:1">
+                    <div class="col-sm-12">
+                        <div class="content" style="z-index:1; min-width:100%">
+                            @Body
+                        </div>
+                    </div>
+                </div>
+                <Cookie></Cookie>
+
+            </div>
+        </div>
+
+    </div>
+
+</div>
+

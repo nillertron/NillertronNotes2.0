@@ -1,0 +1,68 @@
+﻿@page "/notes/edit/{noteid:int}"
+@using Markdig;
+@inject NillertronNotes.Service.NoteService Service
+@inject IJSRuntime JsRunTime
+<Alert Message="@Message" Succes="@_succes" ShowComponent="_showComponent"></Alert>
+@Message
+<h3>@Model.Overskrift</h3>
+<div class="row">
+    <div class="col-6">
+        <EditForm Model="Model" OnValidSubmit="ValidSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <input placeholder="Overskrift" @bind="Model.Overskrift" @bind:event="oninput" /><br />
+            <RichTextArea OnTextChanged="TextChanged"></RichTextArea><br />
+            <button type="submit" class="btn btn-primary">Edit</button>
+        </EditForm>
+    </div>
+    <div class="col-6">
+        <h3>@Model.Overskrift</h3>
+        @((MarkupString)Preview)
+    </div>
+</div>
+<PictureUploader saveLocation="images/"></PictureUploader>
+@code {
+    [Parameter]
+    public int NoteId { get; set; }
+    private Noter Model = new Noter();
+    private string Preview { get { var s = NillertronNotes.Static.StaticHelpers.ReplaceToHtmlTags(Model.NoteText); return Markdown.ToHtml(s); } }
+
+    private string Message = string.Empty;
+    private bool _succes;
+    private bool _showComponent;
+
+    private async Task ValidSubmit()
+    {
+        try
+        {
+            Model.NoteText = Preview;
+            await Service.Update(Model);
+            Message = "Updated";
+            _succes = true;
+            _showComponent = true;
+        }
+        catch(Exception e)
+        {
+            Message = e.Message;
+            _succes = false;
+            _showComponent = true;
+        }
+    }
+    private async Task TextChanged(string text)
+    {
+        Model.NoteText = text;
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        Model = await Service.GetSpecific(NoteId);
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(firstRender)
+        {
+            Model.NoteText = NillertronNotes.Static.StaticHelpers.ReplaceToPlainText(Model.NoteText);
+            await JsRunTime.InvokeVoidAsync("InitText", Model.NoteText);
+        }
+    }
+}

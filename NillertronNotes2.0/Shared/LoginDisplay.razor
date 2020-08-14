@@ -1,0 +1,13 @@
+﻿<AuthorizeView>
+    <Authorized>
+        <div style="float:right" class="d-inline-flex">
+            <a style="padding-top:9px;" href="Identity/Account/Manage">Hello, @context.User.Identity.Name!</a>
+            <form method="post" action="Identity/Account/LogOut">
+                <button type="submit" class="nav-link btn btn-link">Log out</button>
+            </form>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <div class="" style="float:right"><a href="Identity/Account/Login"><span class="oi oi-account-login"></span> Log in</a></div>
+    </NotAuthorized>
+</AuthorizeView>

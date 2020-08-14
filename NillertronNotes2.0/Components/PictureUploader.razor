@@ -1,0 +1,73 @@
+﻿@using System.IO
+@inject IJSRuntime JsRuntime
+@using Microsoft.AspNetCore.Hosting
+@inject IWebHostEnvironment  env
+<div class="row">
+    <div class="col-3">
+        <BlazorInputFile.InputFile OnChange="UploadFile"></BlazorInputFile.InputFile>
+    </div>
+</div>
+<div><h3>Uploaded pictures:</h3></div>
+<div class="card-deck">
+    @foreach(var p in images)
+    {
+        var imgString = p.Replace("d:\\web\\localuser\\nillertron.com\\note\\wwwroot\\", "http://note.nillertron.com/");
+    <div id="@p" class="card" style="max-width: 18rem">
+        <div class="card-header"><button class="btn btn-primary" @onclick="@(async () => await CopyTextToClipBoard(imgString))">Copy link</button></div>
+        <div class="card-body"><img src="@imgString" class="img-thumbnail" /></div>
+        <div class="card-footer"><button class="btn btn-danger" @onclick="@(async () => await DeleteFile(p))">Delete</button></div>
+    </div>
+    }
+</div>
+
+@Message
+@code {
+    [Parameter]
+    public string saveLocation { get; set; }
+    private List<string> images = new List<string>();
+    private string Message;
+    private async Task UploadFile(BlazorInputFile.IFileListEntry[] files)
+    {
+        var file = files.FirstOrDefault();
+        var path1 = env.WebRootPath;
+        var path = Path.Combine(path1, saveLocation);
+        if (!Directory.Exists(path))
+            Directory.CreateDirectory(path);
+        path = NillertronNotes.Static.StaticHelpers.CheckFileExistsReplaceName(path, file.Name);
+        try
+        {
+            using (var stream = new FileStream(path,FileMode.Create))
+            {
+
+                await file.Data.CopyToAsync(stream);
+                images.Add(path);
+                StateHasChanged();
+            }
+        }
+        catch(Exception e)
+        {
+            Message = e.Message;
+        }
+
+    }
+
+    private async Task CopyTextToClipBoard(string textToCopy)
+    {
+        await JsRuntime.InvokeVoidAsync("copyText", textToCopy);
+    }
+
+    private async Task DeleteFile(string path)
+    {
+        try
+        {
+            File.Delete(path);
+            await JsRuntime.InvokeVoidAsync("RemoveDiv", path);
+            Message = "Deleted " + path;
+            images.Remove(path);
+        }
+        catch(Exception e)
+        {
+            Message = e.Message;
+        }
+    }
+}

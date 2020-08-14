@@ -1,0 +1,41 @@
+﻿@inject IJSRuntime JsRuntime
+    <div class="fixed-bottom">
+        <div id="CookieDom" class="@Show" role="alert">
+            <div class="alert-heading">
+                <p>Cookies!</p>
+            </div>
+            <p>This website uses cookies to ensure you get the best experience on our website.</p>
+            <button type="button" class="btn btn-success btn-sm" @onclick="AcceptCookies">Accept</button>
+            <button class="btn btn-danger btn-sm" @onclick="DeclineCookies">Decline</button>
+
+        </div>
+    </div>
+@code  {
+            private bool Toggle = false;
+            private string Show { get { return Toggle?"alert alert-primary alert-dismissible":"invisible"; } }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        var kageTjek = await JsRuntime.InvokeAsync<bool>("CheckCookie", "AcceptCookie");
+        if(firstRender)
+        Toggle = true;
+        if (kageTjek)
+        {
+            Toggle = false;
+
+        }
+        StateHasChanged();
+    }
+    public async Task AcceptCookies()
+    {
+        await JsRuntime.InvokeVoidAsync("WriteCookie", "AcceptCookie", "Yes", 10);
+
+        Toggle = false;
+        StateHasChanged();
+    }
+    public async Task DeclineCookies()
+    {
+        await JsRuntime.InvokeVoidAsync("GoBack");
+
+    }
+}

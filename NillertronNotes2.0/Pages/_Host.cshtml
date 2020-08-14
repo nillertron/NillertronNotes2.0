@@ -1,0 +1,36 @@
+﻿@page "/"
+@namespace NillertronNotes.Pages
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NillertronNotes</title>
+    <base href="~/" />
+    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
+    <link href="css/site.css" rel="stylesheet" />
+    <link href="~/css/bootstrap/MyStyle.css" />
+    <link rel="icon" type="image/png" href="~/favicon.png" />
+    <script data-ad-client="ca-pub-1875643397015773" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+</head>
+<body>
+    <app>
+        @(await Html.RenderComponentAsync<NillertronNotes2._0.App>(RenderMode.ServerPrerendered))
+    </app>
+    <script src="~/JS/JQuery.js"></script>
+    <script src="_framework/blazor.server.js"></script>
+    @*<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>*@
+    <script src="~/JS/SelectedText.js"></script>
+    <script src="~/JS/FileUpload.js"></script>
+    <script src="~/JS/ClipBoard.js"></script>
+    <script src="~/JS/Library.js"></script>
+    <script src="~/JS/Alert.js"></script>
+    <script src="_ValidationScriptsPartial"></script>
+
+
+
+
+</body>
+</html>

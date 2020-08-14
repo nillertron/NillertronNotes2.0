@@ -1,0 +1,69 @@
+﻿@attribute [Authorize(Roles = "Admin")]
+@inject NillertronNotes.Service.FilService Service
+@page "/files/create/{fagid:int}"
+@using Microsoft.AspNetCore.Hosting
+@inject IWebHostEnvironment  env
+@using System.IO
+<NillertronNotes2._0.Components.Alert Message="@_msg" ShowComponent="@_show" Succes="_succes"></NillertronNotes2._0.Components.Alert>
+<EditForm Model="_model" OnValidSubmit="Save">
+    <ValidationSummary />
+    <DataAnnotationsValidator></DataAnnotationsValidator>
+    <InputText placeholder="Navn" @bind-Value="@_model.DisplayName"></InputText><br />
+    <InputTextArea placeholder="Beskrivelse" @bind-Value="@_model.Beskrivelse"></InputTextArea><br />
+    <InputFile OnChange="Upload"></InputFile><br />
+    <button type="submit" class="btn btn-primary">Gem</button><br />
+</EditForm>
+@code {
+    [Parameter]
+    public int FagId { get; set; }
+    string _beskrivelse;
+    private string _msg = string.Empty;
+    private bool _succes;
+    private bool _show;
+    private FagFiler _model = new FagFiler { BrugerId = 1 };
+    private async Task Upload(IFileListEntry[] files)
+    {
+        var file = files.FirstOrDefault();
+        if (file != null)
+        {
+            try
+            {
+                var path = env.WebRootPath+"/files/studie/";
+                _model.Url = file.Name;
+                path = NillertronNotes.Static.StaticHelpers.CheckFileExistsReplaceName(path, file.Name);
+                using (var fs = new FileStream(path, FileMode.Create))
+                {
+                    await file.Data.CopyToAsync(fs);
+                    _succes = true;
+                    _show = true;
+                    _msg = "Uploadet fil";
+                }
+            }
+            catch (Exception e)
+            {
+                _msg = e.Message;
+                _succes = false;
+                _show = true;
+                _model.Url = string.Empty;
+            }
+
+        }
+    }
+    private async Task Save()
+    {
+        try
+        {
+            await Service.CreateFile(_model, FagId);
+            _succes = true;
+            _show = true;
+            _msg = "File saved in database";
+        }
+        catch (Exception e)
+        {
+            _msg = e.Message;
+            _succes = false;
+            _show = true;
+            _model.Url = string.Empty;
+        }
+    }
+}

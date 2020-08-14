@@ -1,0 +1,30 @@
+﻿@inject IJSRuntime JSRuntime
+<div>
+    <div class="btn-group" role="group">
+        <button type="button" class="btn btn-secondary" @onclick="@(async () => { await AddTag("F"); })">F</button>
+        <button type="button" class="btn btn-secondary" @onclick="@(async() => await AddTag("I"))">I</button>
+        <button type="button" class="btn btn-secondary" @onclick="@(async() => await AddTag("U"))">U</button>
+        <button type="button" class="btn btn-secondary" @onclick="@(async() => await AddTag("IMG"))">IMG</button>
+        <button type="button" class="btn btn-secondary" @onclick="@(async() => await AddTag("LINK"))">Link</button>
+
+
+    </div>
+    <div>
+        <textarea id="TextArea" @bind="Text" @bind:event="oninput" on style="width:100%; min-height:500px"></textarea>
+
+    </div>
+</div>
+@code { 
+    [Parameter]
+    public EventCallback<string> OnTextChanged { get; set; }
+
+    private string _text;
+    public string Text { get => _text; set { _text = value; OnTextChanged.InvokeAsync(Text); } }
+
+    private async Task AddTag(string tag)
+    {
+        await JSRuntime.InvokeVoidAsync("replaceSelectedText", tag);
+        Text = await JSRuntime.InvokeAsync<string>("GetText");
+    }
+
+}

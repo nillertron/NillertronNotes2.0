@@ -1,0 +1,52 @@
+﻿@inject NillertronNotes.Service.NavMenuService Service;
+@inject IJSRuntime JsRuntime
+<div id="mySidenav" class="TopNavDiv d-inline" style="display:inline-block">
+    @*@if (!collapseNavMenu)
+    {
+        <span class="close" @onclick="@((async () => { await RemoveElements(Fag); await JsRuntime.InvokeVoidAsync("closeNav"); collapseNavMenu = true; }))">&times;</span>
+
+    }*@
+    @foreach (var fag in Fag)
+    {
+    <a id="@fag.Id" class="nav-link" style="display:inline; color:whitesmoke" href="@("content/" + fag.Id)">
+        <span class="oi oi-book" aria-hidden="true"></span> @fag.Fag1
+    </a>
+    }
+</div>
+@*@if (collapseNavMenu)
+{
+    <span class="oi oi-arrow-right float-right" @onclick="@((async () => { await AddElements(Fag); await JsRuntime.InvokeVoidAsync("openNav"); collapseNavMenu = false; StateHasChanged(); }))"></span>
+}*@
+
+
+@code {
+    private List<Fag> Fag = new List<Fag>();
+    bool _collapseNavMenu = false;
+    bool collapseNavMenu { get => _collapseNavMenu; set { _collapseNavMenu = value; StateHasChanged(); } }
+
+    protected override async Task OnInitializedAsync()
+    {
+        base.OnInitialized();
+        Fag = await Service.GetAll();
+
+    }
+
+    void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+    async Task RemoveElements(List<Fag> fag)
+    {
+        fag.ForEach(async o =>
+        {
+            await JsRuntime.InvokeVoidAsync("RemoveDiv", o.Id);
+        });
+    }
+    async Task AddElements(List<Fag> fag)
+    {
+        fag.ForEach(async o =>
+        {
+            await JsRuntime.InvokeVoidAsync("ShowDiv", o.Id);
+        });
+    }
+}

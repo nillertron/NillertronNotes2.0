@@ -1,0 +1,30 @@
+﻿@page "/content/{fagid}"
+@inject NillertronNotes.Service.FagService Service
+<h3>@CurrentFag.Fag1</h3>
+<button @onclick="@(() => { Toggle = false; StateHasChanged(); })" class="btn btn-primary"><i class="oi oi-document"></i> Noter</button>
+<button @onclick="@(() => { Toggle = true; StateHasChanged(); })" class="btn btn-primary"><i class="oi oi-file"></i> Filer</button>
+@if (!Toggle)
+{
+    <NillertronNotes2._0.Pages.Notes.Notes fagid="@CurrentFag.Id.ToString()"></NillertronNotes2._0.Pages.Notes.Notes>
+}
+else
+{
+    <NillertronNotes2._0.Pages.Files.Files FagId="@CurrentFag.Id"></NillertronNotes2._0.Pages.Files.Files>
+}
+
+@code {
+    private bool Toggle = false;
+    [Parameter]
+    public string FagId { get; set; }
+
+    private Fag CurrentFag { get { return FagListe.Where(x => x.Id == Convert.ToInt32(FagId)).FirstOrDefault(); } }
+    private List<Fag> FagListe = new List<Fag>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        FagListe = await Service.GetAll();
+        StateHasChanged();
+    }
+
+}

@@ -1,0 +1,19 @@
+﻿@page "/notes/details/{noteId:int}"
+@inject NillertronNotes.Service.NoteService Service
+<h3>@_selectedNote.Overskrift</h3>
+<p class="text-body">
+    @((MarkupString)_selectedNote.NoteText)<br />
+    @_selectedNote.Skrevet
+</p>
+@code {
+    [Parameter]
+    public int NoteId { get; set; }
+    private Noter _selectedNote = new Noter();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        _selectedNote = await Service.GetSpecific(NoteId);
+        _selectedNote.NoteText = await Service.WrapItUpBaby(_selectedNote.NoteText);
+    }
+}

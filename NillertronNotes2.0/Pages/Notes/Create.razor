@@ -1,0 +1,67 @@
+﻿@attribute [Authorize(Roles = "Admin")]
+@inject NillertronNotes.Service.NoteService Service
+@page "/notes/create/{fagid}"
+@using Markdig;
+<Alert Message="@Message" Succes="@_succes" ShowComponent="@_showComponent"></Alert>
+<h3>Create Note</h3>
+<div class="row">
+    <div class="col-6">
+        <EditForm Model="Model" OnValidSubmit="ValidSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <input placeholder="Overskrift" @bind="Model.Overskrift" @bind:event="oninput" /><br />
+            <RichTextArea OnTextChanged="TextChanged"></RichTextArea><br />
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+    <div class="col-6">
+        <h3>@Model.Overskrift</h3>
+        @((MarkupString)Preview)
+    </div>
+</div>
+    <div class="row">
+        <div class="col-12">
+            <PictureUploader saveLocation="images/"></PictureUploader>
+        </div>
+
+    </div>
+    
+
+
+@code {
+    [Parameter]
+    public string FagId { get; set; }
+    public string Preview { get { var s = NillertronNotes.Static.StaticHelpers.ReplaceToHtmlTags(Model.NoteText); return Markdown.ToHtml(s); } }
+    private Noter Model = new Noter();
+    string Message { get; set; }
+    bool _succes;
+    bool _showComponent;
+
+    public async Task ValidSubmit()
+    {
+        try
+        {
+            Model.NoteText = Preview;
+            Model.FagId = Convert.ToInt32(FagId);
+            await Service.Create(Model);
+            Message = "Note Created";
+            _succes = true;
+            _showComponent = true;
+        }
+        catch (Exception e)
+        {
+            Message = e.Message;
+            _succes = false;
+            _showComponent = true;
+
+        }
+
+
+    }
+
+    private async void TextChanged(string text)
+    {
+        Model.NoteText = text;
+    }
+
+}

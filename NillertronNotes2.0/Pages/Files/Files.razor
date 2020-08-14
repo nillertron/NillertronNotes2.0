@@ -1,0 +1,77 @@
+﻿@inject NillertronNotes.Service.FagService FagService
+@inject NillertronNotes.Service.FilService Service
+@inject IJSRuntime JsRuntime
+<NillertronNotes.Components.Alert Message="@_msg" ShowComponent="@_show" Succes="_succes"></NillertronNotes.Components.Alert>
+<h3>Files</h3>
+<input type="text" placeholder="Search" @bind="@_searchString" @oninput="@(async (e)=> await Search(e.Value.ToString()))" /><AuthorizeView Roles="Admin"><a href="@createUrl"><i class="oi oi-plus"></i></a></AuthorizeView>
+@foreach (var f in FilListe)
+{
+    <div class="card" id="@f.Id" style="">
+        <div class="card-header">
+            <p style="display:inline">@f.DisplayName<AuthorizeView Roles="Admin"><a href="javascript:void(0);"><i @onclick="@(async () => await Delete(f))" class="oi oi-delete float-right"></i></a></AuthorizeView></p>
+</div>
+        <div class="card-body">
+            <p>
+                @f.Beskrivelse
+            </p>
+        </div>
+        <div class="card-footer">
+            <a target="_blank" class="btn btn-primary" href="@f.Url" download="@f.Url">
+                Download
+            </a>
+        </div>
+    </div>
+    <br />
+}
+@code {
+    [Parameter]
+    public int FagId { get => _fagId; set { _fagId = value; OnInitializedAsync(); } }
+    private int _fagId;
+    private string createUrl { get {return "files/create/" + FagId; } }
+
+    private string _searchString = string.Empty;
+
+    public List<FagFiler> FilListe { get; set; } = new List<FagFiler>();
+
+    private string _msg = string.Empty;
+    private bool _succes;
+    private bool _show;
+
+    protected override async Task OnInitializedAsync()
+    {
+        FilListe.Clear();
+        await base.OnInitializedAsync();
+        FilListe = await Service.GetAllForSubject(FagId);
+    }
+
+    private async Task Search(string text)
+    {
+        FilListe = await Service.Search(text);
+        StateHasChanged();
+    }
+
+    private async Task Delete(FagFiler data)
+    {
+        var tjek = await JsRuntime.InvokeAsync<bool>("confirm","Are you sure?");
+        if(tjek)
+        {
+            try
+            {
+                await Service.DeleteFile(data);
+                await JsRuntime.InvokeVoidAsync("RemoveDiv", data.Id);
+                _show = true;
+                _succes = true;
+                _msg = "File deleted";
+            }
+            catch(Exception e)
+            {
+                _show = true;
+                _succes = false;
+                _msg = e.Message;
+            }
+
+        }
+    }
+
+
+}

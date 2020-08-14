@@ -1,0 +1,26 @@
+﻿.ImgWrap{
+    width:100px;
+    display:inline-block;
+}
+    .ImgWrap img {
+        display: inline-block;
+        width: 5em;
+    }
+.TopNavDiv{
+
+}
+.SideContentDiv .closebtn {
+    position:absolute;
+    top:0;
+    right:25px;
+    font-size:36px;
+    margin-left:50px;
+
+}
+
+.TopNavDiv a:hover {
+    color: #f1f1f1;
+}
+-TopNavDiv a {
+    color: #f1f1f1;
+}

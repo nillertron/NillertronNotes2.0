@@ -1,0 +1,102 @@
+﻿@page "/notes/{fagid}"
+@inject NillertronNotes.Service.NoteService Service
+@inject IJSRuntime JsRuntime
+<Alert Message="@Message" Succes="@_succes" ShowComponent="_showComponent"></Alert>
+<h3>Notes</h3>
+<input placeholder="Search" @oninput="((e) => Search(e.Value.ToString()))" type="text" />
+<AuthorizeView Roles="Admin">
+    <Authorized>
+        <NavLink href="@{"notes/create/"+_fagid}"><span class="oi oi-plus"></span></NavLink>
+    </Authorized>
+</AuthorizeView>
+@foreach (var p in NoteListe)
+{
+    <div id="@p.Id" class="card" style="">
+        <div class="card-header">
+
+            <h5 class="card-title" style="display:inline">@p.Overskrift<AuthorizeView Roles="Admin"><a href="javascript:void(0);"><i @onclick="@(async () => await Delete(p))" class="oi oi-delete float-right"></i></a><a href="@("notes/edit/"+p.Id)"><i class="oi float-right oi-brush" style="padding-right:10px"></i></a></AuthorizeView></h5>
+
+
+        </div>
+        <div class="card-body overflow-auto">
+            <p class="card-text">
+                @if (p.NoteText.Length >= 300)
+                {
+                    var markUp = (MarkupString)p.NoteText.Substring(0, 300);
+                    @markUp;
+                }
+                else
+                {
+                    var markUp = (MarkupString)p.NoteText;
+                    @markUp;
+                }
+            </p>
+            <a href="@("notes/details/"+p.Id)" class="btn btn-primary">Details</a>
+        </div>
+    </div>
+    <br />
+}
+
+@code {
+    [CascadingParameter]
+    Task<AuthenticationState> authenticationStateTask { get; set; }
+    private string _fagid;
+    [Parameter]
+    public string fagid { get => _fagid; set { _fagid = value; SelectNew(); } }
+
+    public List<Noter> NoteListe { get; set; } = new List<Noter>();
+    private string Message = string.Empty;
+    private bool _succes;
+    private bool _showComponent;
+    protected override async Task OnInitializedAsync()
+    {
+        await authenticationStateTask;
+        await base.OnInitializedAsync();
+    }
+
+    private async Task Search(string searchWord)
+    {
+        searchWord = searchWord.Trim();
+        if (searchWord.Length == 0)
+            SelectNew();
+        else
+        {
+            NoteListe = await Service.Search(searchWord);
+            StateHasChanged();
+
+        }
+    }
+
+    private async void SelectNew()
+    {
+        NoteListe = await Service.GetAllForSubject(Convert.ToInt32(fagid));
+        foreach (var v in NoteListe)
+        {
+            v.NoteText = await Service.WrapItUpBaby(v.NoteText);
+        }
+        StateHasChanged();
+    }
+
+    private async Task Delete(Noter note)
+    {
+        var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
+        if (confirmed)
+        {
+            try
+            {
+                await Service.Delete(note);
+                await JsRuntime.InvokeVoidAsync("RemoveDiv", note.Id);
+                Message = "Note deleted";
+                _succes = true;
+                _showComponent = true;
+            }
+            catch(Exception e)
+            {
+                Message = e.Message;
+                _succes = false;
+                _showComponent = true;
+            }
+
+        }
+    }
+}
